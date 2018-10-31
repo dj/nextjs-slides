@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Next.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/solarized.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Next.js</h1>
+					<p>Daniel Hartman</p>
+				</section>
+
+				<section>
+					<h1>Outline</h1>
+					<ul>
+						<li>What are the goals of Next.js?</li>
+						<li>What are the features of Next.js? (How do we achieve the goals?)</li>
+						<li>Demo</li>
+						<li>Q & A</li>
+					</ul>
+				</section>
+
+				<section>
+					<h1>What are the goals of Next.js?</h1>
+					<aside class="notes">
+						<p>
+							Before describing the features of Next, let's examine the project's goals.
+						</p>
+						<p>
+							Next was released about 2 years ago on October 25th, 2016, on <a href="https://zeit.co/blog/next">Zeit's website</a>.
+						</p>
+						<p>
+							However, there is a blog post from Next's author that is a bit more relevant to explaining the motivations for Next,
+							<a href="https://rauchg.com/2014/7-principles-of-rich-web-applications">7 Principles of Rich Web Applications</a></p>
+						<p></p>
+					</aside>
+				</section>
+
+				<section>
+					<h2><a href="https://rauchg.com/2014/7-principles-of-rich-web-applications">7 Principles of Rich Web Applications</a></h2>
+					<p>Guillermo Rauch</p>
+					<ul>
+						<li class="fragment highlight-current-blue">Server rendered pages are not optional</li>
+						<li class="fragment highlight-current-blue">Act immediately on user input</li>
+						<li class="fragment highlight-current-blue">React to data changes</li>
+						<li class="fragment highlight-current-blue">Control the data exchange with the server</li>
+						<li class="fragment highlight-current-blue">Don’t break history, enhance it</li>
+						<li class="fragment highlight-current-blue">Push code updates</li>
+						<li class="fragment highlight-current-blue">Predict behavior</li>
+					</ul>
+					<aside class="notes">
+						<p>
+							I recommend checking out this blog post if you're interested in the topic, but let's go over these principles quickly.
+						</p>
+						<b>Server rendered pages are not optional</b>
+						<p>
+							We're familiar with how a conventional Single Page App (SPA) works.
+							No matter the request, the server returns the same initial response: an HTML page with little besides link and script tags.
+						</p>
+						<p>
+							The client-side JS renders a loading UI and makes additional HTTP requests to get the data needed to finish rendering the UI. 
+						</p>
+						<p>
+							Using this method, we increase latency, increase time to a fully rendered UI, and for that we get decreased Time To First Byte (TTFB) and faster page loads after the initial js bundle is loaded.
+						</p>
+						<p>
+							The alternative to this is confusingly called Server-side rendering. It should really be called something else to distinguish it from a conventional server-rendered web application.
+							It is also confusingly referred to as client-side hydration. See <a href="https://reactjs.org/docs/react-dom.html#hydrate">ReactDom.hydrate()</a>.
+						</p>
+						<p>
+							SSR typically eliminates the first request for data from client-side rendering so that the first UI that the user sees is already populated with their data.
+						</p>
+						<p>
+							Right away the user can click links. Initially they will trigger a full page load. This is good: if a user is on a mobile device with a weak processor and slow connection,
+							it can take a while for the client bundle to initialize. Once the client has initialized, the client functions like a traditional SPA.
+						</p>
+						<b>Act immediately on user input</b>
+						<p>
+							Pretty straightforward, but this just means that layout changes shouldn't require full page loads.
+						</p>
+						<b>React to data changes</b>
+						<p>
+							When data changes on the server, the client should be updated without the user needing to refresh.
+						</p>
+						<p>
+							If you sign out on one tab, you should be signed out in all other tabs for the same site.
+							If open an email in one tab, the email should be marked as read in another tab.
+							If the user closes their laptop, and then opens it later, their newsfeed should show the most recent posts, or at least let them know that there are more recent posts that they can load.
+						</p>
+						<b>Control the data exchange with the server</b>
+						<p>
+							Quote: We can now fine-tune the data exchange with the server. Make sure to handle errors, retry on behalf of the user, sync
+							data on the background and maintain offline caches.
+						</p>
+						<b>Don’t break history, enhance it</b>
+						<p>
+							If you've worked on an SPA before you know that this isn't easy.
+						</p>
+						<b>Push code updates</b>
+						<p>
+							Another common pitfall of SPAs, what happens when a user on your site and you deploy an update? In a traditional web app, a page reload will fix that.
+						</p>
+						<b>Predict behavior</b>
+						<p>
+							This means that you should do things like intelligently preload resources before users actually need them.
+						</p>
+					</aside>
+				</section>
+
+				<section>
+					<h1>What are the features of Next.js?</h1>
+				</section>
+
+				<section>
+					<h2>File system based routing</h2>
+					<ul>
+						<li>
+							By default, Next.js will map requests to components in <code>/pages</code>
+							<ul>
+								<li>Ex: <b><code>/about-us</code></b> loads <b><code>/pages/about-us.js</code></b></li>
+							</ul>
+						</li>
+						<li>
+							This is really nice, but will become irrelevant when you need dynamic routes.
+						</li>
+						<li>
+							The way you implement dynamic routes is by using Next.js programatically. You will have to implement your own routing on the server (with something like Express).
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Automatic code splitting</h2>
+					<ul>
+						<li>Each page is bundled with all of it's imports.</li>
+						<li>Code to run aditional pages is imported when you navigate to a different page.</li>
+						<li>Fetching happens off main UI thread in a serviceWorker</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Server-side rendering</h2>
+					<ul>
+						<li>
+							SSR is enabled by implementing <code><b>getInitialProps()</b></code> static method on page components.
+						</li>
+						<li>
+							<code><b>getInitialProps()</b></code> is called on the server as well as on the client when using next's <code><b>Link</b></code> component.
+						</li>
+						<li>
+							Up to developer to fetch data on server and client or only on client.
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Prefetching</h2>
+					<ul>
+						<li>
+							Next.js comes with a <code><b>Link</b></code> component for client side routing.
+						</li>
+						<li>
+							Prefetching can be done with Link or imperatively.
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Static Export</h2>
+					<ul>
+						<li>
+							Useful for small sites.
+						</li>
+						<li>
+							Not as simple as Gatsby.
+						</li>
+					</ul>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
